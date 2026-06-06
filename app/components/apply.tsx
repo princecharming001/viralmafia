@@ -8,6 +8,7 @@ import {
   type FormEvent,
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import NarwhalLeap from "./narwhal";
 
 const NETWORKS = [
   "Instagram",
@@ -21,8 +22,9 @@ const NETWORKS = [
   "Other",
 ];
 
+// Soft, muted pastel spectrum (gentler than the vivid water).
 const RAINBOW =
-  "linear-gradient(90deg,#ff3b3b,#ff9f1c,#ffe600,#2ecc71,#1e90ff,#7b2ff7,#ff4fd8)";
+  "linear-gradient(90deg,#f3acc0,#f6cfa9,#f1e7ab,#bfe6c8,#aed5ef,#c8bfee,#efbce1)";
 
 type Platform = { id: number; network: string; handle: string };
 
@@ -111,6 +113,8 @@ function Counter({ value }: { value: string }) {
 export default function ApplyModal() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [platforms, setPlatforms] = useState<Platform[]>([
     { id: 1, network: "Instagram", handle: "" },
   ]);
@@ -168,12 +172,14 @@ export default function ApplyModal() {
   const progress = useMemo(() => {
     let f = 0;
     if (name.trim()) f++;
+    if (email.trim()) f++;
+    if (phone.trim()) f++;
     if (platforms.some((p) => p.handle.trim())) f++;
     if (want.trim()) f++;
     if (offer.trim()) f++;
     if (location.trim()) f++;
-    return f / 5;
-  }, [name, platforms, want, offer, location]);
+    return f / 7;
+  }, [name, email, phone, platforms, want, offer, location]);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -256,7 +262,7 @@ export default function ApplyModal() {
                     initial={{ scale: 0.5, opacity: 0, rotate: -12 }}
                     animate={{ scale: 1, opacity: 1, rotate: 0 }}
                     transition={{ type: "spring", stiffness: 200, damping: 14 }}
-                    className="mb-6 flex h-16 w-16 items-center justify-center rounded-full text-white"
+                    className="mb-6 flex h-16 w-16 items-center justify-center rounded-full text-ink/75"
                     style={{ backgroundImage: RAINBOW }}
                   >
                     <Check />
@@ -290,7 +296,34 @@ export default function ApplyModal() {
                     />
                   </Field>
 
-                  <Field n={2} label="Where you create">
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <Field n={2} label="Email" htmlFor="ap-email">
+                      <input
+                        id="ap-email"
+                        type="email"
+                        required
+                        autoComplete="email"
+                        placeholder="you@domain.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={fieldClass}
+                      />
+                    </Field>
+                    <Field n={3} label="Phone number" htmlFor="ap-phone">
+                      <input
+                        id="ap-phone"
+                        type="tel"
+                        required
+                        autoComplete="tel"
+                        placeholder="+44 7700 900000"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className={fieldClass}
+                      />
+                    </Field>
+                  </div>
+
+                  <Field n={4} label="Where you create">
                     <div className="flex flex-col gap-2.5">
                       <AnimatePresence initial={false}>
                         {platforms.map((p) => (
@@ -362,7 +395,7 @@ export default function ApplyModal() {
                   </Field>
 
                   <Field
-                    n={3}
+                    n={5}
                     label="What do you want from Viral Mafia?"
                     htmlFor="ap-want"
                   >
@@ -379,7 +412,7 @@ export default function ApplyModal() {
                   </Field>
 
                   <Field
-                    n={4}
+                    n={6}
                     label="What do you have to offer?"
                     htmlFor="ap-offer"
                   >
@@ -395,7 +428,7 @@ export default function ApplyModal() {
                     <Counter value={offer} />
                   </Field>
 
-                  <Field n={5} label="Where are you based?" htmlFor="ap-loc">
+                  <Field n={7} label="Where are you based?" htmlFor="ap-loc">
                     <div className="relative">
                       <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint">
                         <Pin />
@@ -438,6 +471,8 @@ export default function ApplyModal() {
               )}
             </div>
           </motion.div>
+
+          {status === "done" && <NarwhalLeap />}
         </motion.div>
       )}
     </AnimatePresence>
