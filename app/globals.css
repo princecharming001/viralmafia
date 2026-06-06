@@ -1,26 +1,68 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Minimalist white canvas, monochrome ink — the only color is the water */
+  --color-bg: #ffffff;
+  --color-ink: #0a0a0c;
+  --color-muted: #6a6a73;
+  --color-faint: #a8a8b0;
+  --color-line: #ededf1;
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background: #fff;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: transparent;
+    color: var(--color-ink);
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: rgba(10, 10, 12, 0.92);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 4px;
+    border-radius: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Let cursor events fall through content to the fluid canvas beneath,
+     while keeping interactive elements clickable. */
+  .pass-through {
+    pointer-events: none;
+  }
+  .pass-through a,
+  .pass-through button,
+  .pass-through input,
+  .pass-through textarea,
+  .pass-through label,
+  .pass-through select {
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
