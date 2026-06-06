@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 const NETWORKS = [
@@ -24,18 +30,8 @@ let pid = 100;
 
 const words = (s: string) => (s.trim() ? s.trim().split(/\s+/) : []);
 
-const inputClass =
-  "peer w-full border-b border-line bg-transparent py-2 text-ink placeholder:text-faint focus:outline-none transition-colors";
-
-function Underline() {
-  return (
-    <span
-      aria-hidden
-      className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 transition-transform duration-300 ease-out peer-focus:scale-x-100"
-      style={{ backgroundImage: RAINBOW }}
-    />
-  );
-}
+const fieldClass =
+  "w-full rounded-xl border border-line bg-white/70 px-4 py-3 text-[0.95rem] text-ink placeholder:text-faint outline-none transition-colors focus:border-ink focus:bg-white";
 
 function Field({
   n,
@@ -52,7 +48,7 @@ function Field({
     <div>
       <label
         htmlFor={htmlFor}
-        className="mb-2 flex items-baseline gap-3 text-xs font-medium uppercase tracking-[0.16em] text-muted"
+        className="mb-2 flex items-baseline gap-2.5 text-xs font-medium uppercase tracking-[0.14em] text-muted"
       >
         <span className="font-display text-[0.7rem] text-faint">
           {String(n).padStart(2, "0")}
@@ -64,13 +60,13 @@ function Field({
   );
 }
 
-/* — tiny icon set — */
+/* — icons — */
 const Plus = () => (
   <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M12 5v14M5 12h14" />
   </svg>
 );
-const X = () => (
+const XIcon = () => (
   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
     <path d="M6 6l12 12M18 6L6 18" />
   </svg>
@@ -103,7 +99,17 @@ const Spinner = () => (
   </svg>
 );
 
-export default function Apply() {
+function Counter({ value }: { value: string }) {
+  const c = words(value).length;
+  return (
+    <div className="mt-1.5 text-right text-xs tabular-nums">
+      <span className={c >= 18 ? "text-ink" : "text-faint"}>{c}/20 words</span>
+    </div>
+  );
+}
+
+export default function ApplyModal() {
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [platforms, setPlatforms] = useState<Platform[]>([
     { id: 1, network: "Instagram", handle: "" },
@@ -112,6 +118,37 @@ export default function Apply() {
   const [offer, setOffer] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "done">("idle");
+
+  // Any element with [data-apply] opens the modal
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement | null)?.closest("[data-apply]");
+      if (!el) return;
+      e.preventDefault();
+      if (status === "done") setStatus("idle");
+      setOpen(true);
+    };
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [status]);
+
+  // Lock background scroll + ESC to close while open
+  useEffect(() => {
+    if (!open) return;
+    const lenis = (window as Window & { __lenis?: { stop: () => void; start: () => void } }).__lenis;
+    lenis?.stop();
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      lenis?.start();
+      document.documentElement.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   const limit =
     (set: (v: string) => void) => (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -145,91 +182,102 @@ export default function Apply() {
     window.setTimeout(() => setStatus("done"), 1300);
   };
 
-  const counter = (val: string) => {
-    const c = words(val).length;
-    return (
-      <span
-        className={`tabular-nums ${c >= 18 ? "text-ink" : "text-faint"}`}
-      >
-        {c}/20 words
-      </span>
-    );
-  };
-
   return (
-    <section id="apply" data-snap className="px-6 py-40">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-12 text-center">
-          <p className="mb-5 text-xs font-medium uppercase tracking-[0.28em] text-muted">
-            Apply
-          </p>
-          <h2 className="font-display text-5xl font-light leading-[1.02] tracking-[-0.03em] text-ink sm:text-7xl">
-            Every application
-            <br />
-            <span className="italic">is read.</span>
-          </h2>
-          <p className="mx-auto mt-6 max-w-md text-base leading-relaxed text-muted">
-            No bots, no auto-replies. A real member reads every one. We keep the
-            bar high and the room small — roughly one in nine get in.
-          </p>
-        </div>
-
+    <AnimatePresence>
+      {open && (
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="relative overflow-hidden rounded-[28px] border border-line bg-white/70 shadow-[0_40px_90px_-50px_rgba(10,10,12,0.4)] backdrop-blur-xl"
+          key="apply-modal"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
         >
-          {/* completion bar */}
-          <div className="absolute inset-x-0 top-0 z-10 h-1 bg-line/50">
-            <motion.div
-              className="h-full origin-left"
-              style={{ backgroundImage: RAINBOW }}
-              initial={false}
-              animate={{ scaleX: status === "done" ? 1 : Math.max(progress, 0.04) }}
-              transition={{ type: "spring", stiffness: 120, damping: 22 }}
-            />
-          </div>
+          {/* scrim */}
+          <button
+            aria-label="Close"
+            onClick={() => setOpen(false)}
+            className="absolute inset-0 cursor-default bg-ink/30 backdrop-blur-[3px]"
+          />
 
-          <AnimatePresence mode="wait">
-            {status === "done" ? (
+          {/* dialog */}
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Apply to Viral Mafia"
+            initial={{ opacity: 0, scale: 0.96, y: 14 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 10 }}
+            transition={{ type: "spring", stiffness: 280, damping: 26 }}
+            className="relative z-10 flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-[26px] border border-line bg-white shadow-[0_40px_120px_-30px_rgba(10,10,12,0.55)]"
+          >
+            {/* completion bar */}
+            <div className="h-1 w-full shrink-0 bg-line/50">
               <motion.div
-                key="done"
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center px-8 py-20 text-center sm:px-12"
-              >
-                <motion.div
-                  initial={{ scale: 0.5, opacity: 0, rotate: -12 }}
-                  animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 14 }}
-                  className="mb-7 flex h-16 w-16 items-center justify-center rounded-full text-white"
-                  style={{ backgroundImage: RAINBOW }}
-                >
-                  <Check />
-                </motion.div>
-                <h3 className="font-display text-3xl font-light text-ink">
-                  You&apos;re in the pile.
-                </h3>
-                <p className="mx-auto mt-3 max-w-sm leading-relaxed text-muted">
-                  A real member will read your application within a week. If
-                  it&apos;s a fit, we&apos;ll reach out personally. Keep building
-                  in the meantime.
+                className="h-full origin-left"
+                style={{ backgroundImage: RAINBOW }}
+                initial={false}
+                animate={{ scaleX: status === "done" ? 1 : Math.max(progress, 0.04) }}
+                transition={{ type: "spring", stiffness: 120, damping: 22 }}
+              />
+            </div>
+
+            {/* header */}
+            <div className="flex shrink-0 items-start justify-between gap-4 px-7 pb-4 pt-6">
+              <div>
+                <p className="text-[0.7rem] font-medium uppercase tracking-[0.22em] text-muted">
+                  Apply to Viral Mafia
                 </p>
-              </motion.div>
-            ) : (
-              <motion.form
-                key="form"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onSubmit={onSubmit}
-                className="flex flex-col gap-8 px-8 py-11 sm:px-12 sm:py-12"
+                <h2 className="mt-1.5 font-display text-2xl font-light leading-tight text-ink">
+                  Every application is read.
+                </h2>
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+                className="-mr-1 -mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-ink/[0.06] hover:text-ink"
               >
-                {/* name */}
-                <Field n={1} label="Your name" htmlFor="ap-name">
-                  <div className="relative">
+                <XIcon />
+              </button>
+            </div>
+
+            {/* body */}
+            <div
+              data-lenis-prevent
+              className="flex-1 overflow-y-auto px-7 pb-7"
+            >
+              {status === "done" ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col items-center py-10 text-center"
+                >
+                  <motion.div
+                    initial={{ scale: 0.5, opacity: 0, rotate: -12 }}
+                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 14 }}
+                    className="mb-6 flex h-16 w-16 items-center justify-center rounded-full text-white"
+                    style={{ backgroundImage: RAINBOW }}
+                  >
+                    <Check />
+                  </motion.div>
+                  <h3 className="font-display text-2xl font-light text-ink">
+                    You&apos;re in the pile.
+                  </h3>
+                  <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted">
+                    A real member will read your application within a week. If
+                    it&apos;s a fit, we&apos;ll reach out personally.
+                  </p>
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-ink px-7 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
+                  >
+                    Done
+                  </button>
+                </motion.div>
+              ) : (
+                <form onSubmit={onSubmit} className="flex flex-col gap-6 pt-1">
+                  <Field n={1} label="Your name" htmlFor="ap-name">
                     <input
                       id="ap-name"
                       type="text"
@@ -238,47 +286,42 @@ export default function Apply() {
                       placeholder="Maya Okonkwo"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className={inputClass}
+                      className={fieldClass}
                     />
-                    <Underline />
-                  </div>
-                </Field>
+                  </Field>
 
-                {/* platforms */}
-                <Field n={2} label="Where you create">
-                  <div className="flex flex-col gap-3">
-                    <AnimatePresence initial={false}>
-                      {platforms.map((p) => (
-                        <motion.div
-                          key={p.id}
-                          layout
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.28, ease: "easeOut" }}
-                          className="flex items-center gap-3 overflow-hidden"
-                        >
-                          <div className="relative w-32 shrink-0 sm:w-36">
-                            <select
-                              aria-label="Platform"
-                              value={p.network}
-                              onChange={(e) =>
-                                patchPlatform(p.id, { network: e.target.value })
-                              }
-                              className="peer w-full cursor-pointer appearance-none border-b border-line bg-transparent py-2 pr-6 text-ink focus:outline-none"
-                            >
-                              {NETWORKS.map((n) => (
-                                <option key={n} value={n}>
-                                  {n}
-                                </option>
-                              ))}
-                            </select>
-                            <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-faint">
-                              <Chevron />
-                            </span>
-                            <Underline />
-                          </div>
-                          <div className="relative flex-1">
+                  <Field n={2} label="Where you create">
+                    <div className="flex flex-col gap-2.5">
+                      <AnimatePresence initial={false}>
+                        {platforms.map((p) => (
+                          <motion.div
+                            key={p.id}
+                            layout
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                            className="flex items-center gap-2.5 overflow-hidden"
+                          >
+                            <div className="relative w-32 shrink-0 sm:w-36">
+                              <select
+                                aria-label="Platform"
+                                value={p.network}
+                                onChange={(e) =>
+                                  patchPlatform(p.id, { network: e.target.value })
+                                }
+                                className={`${fieldClass} cursor-pointer appearance-none pr-9`}
+                              >
+                                {NETWORKS.map((n) => (
+                                  <option key={n} value={n}>
+                                    {n}
+                                  </option>
+                                ))}
+                              </select>
+                              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-faint">
+                                <Chevron />
+                              </span>
+                            </div>
                             <input
                               type="text"
                               aria-label="Handle"
@@ -287,46 +330,42 @@ export default function Apply() {
                               onChange={(e) =>
                                 patchPlatform(p.id, { handle: e.target.value })
                               }
-                              className={inputClass}
+                              className={`${fieldClass} flex-1`}
                             />
-                            <Underline />
-                          </div>
-                          {platforms.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removePlatform(p.id)}
-                              aria-label="Remove platform"
-                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-faint transition-colors hover:bg-ink/[0.06] hover:text-ink"
-                            >
-                              <X />
-                            </button>
-                          )}
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
+                            {platforms.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removePlatform(p.id)}
+                                aria-label="Remove platform"
+                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-faint transition-colors hover:bg-ink/[0.06] hover:text-ink"
+                              >
+                                <XIcon />
+                              </button>
+                            )}
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
 
-                    {platforms.length < 5 && (
-                      <button
-                        type="button"
-                        onClick={addPlatform}
-                        className="group mt-1 inline-flex w-fit items-center gap-2.5 text-sm font-medium text-muted transition-colors hover:text-ink"
-                      >
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-line text-ink transition-colors group-hover:border-ink">
-                          <Plus />
-                        </span>
-                        Add another platform
-                      </button>
-                    )}
-                  </div>
-                </Field>
+                      {platforms.length < 5 && (
+                        <button
+                          type="button"
+                          onClick={addPlatform}
+                          className="group inline-flex w-fit items-center gap-2.5 text-sm font-medium text-muted transition-colors hover:text-ink"
+                        >
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full border border-line text-ink transition-colors group-hover:border-ink">
+                            <Plus />
+                          </span>
+                          Add another platform
+                        </button>
+                      )}
+                    </div>
+                  </Field>
 
-                {/* want */}
-                <Field
-                  n={3}
-                  label="What do you want from Viral Mafia?"
-                  htmlFor="ap-want"
-                >
-                  <div className="relative">
+                  <Field
+                    n={3}
+                    label="What do you want from Viral Mafia?"
+                    htmlFor="ap-want"
+                  >
                     <textarea
                       id="ap-want"
                       required
@@ -334,22 +373,16 @@ export default function Apply() {
                       placeholder="In 20 words or fewer."
                       value={want}
                       onChange={limit(setWant)}
-                      className={`${inputClass} resize-none`}
+                      className={`${fieldClass} resize-none leading-relaxed`}
                     />
-                    <Underline />
-                    <div className="mt-1.5 text-right text-xs">
-                      {counter(want)}
-                    </div>
-                  </div>
-                </Field>
+                    <Counter value={want} />
+                  </Field>
 
-                {/* offer */}
-                <Field
-                  n={4}
-                  label="What do you have to offer?"
-                  htmlFor="ap-offer"
-                >
-                  <div className="relative">
+                  <Field
+                    n={4}
+                    label="What do you have to offer?"
+                    htmlFor="ap-offer"
+                  >
                     <textarea
                       id="ap-offer"
                       required
@@ -357,62 +390,56 @@ export default function Apply() {
                       placeholder="In 20 words or fewer."
                       value={offer}
                       onChange={limit(setOffer)}
-                      className={`${inputClass} resize-none`}
+                      className={`${fieldClass} resize-none leading-relaxed`}
                     />
-                    <Underline />
-                    <div className="mt-1.5 text-right text-xs">
-                      {counter(offer)}
+                    <Counter value={offer} />
+                  </Field>
+
+                  <Field n={5} label="Where are you based?" htmlFor="ap-loc">
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-faint">
+                        <Pin />
+                      </span>
+                      <input
+                        id="ap-loc"
+                        type="text"
+                        required
+                        placeholder="London, UK"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className={`${fieldClass} pl-10`}
+                      />
                     </div>
-                  </div>
-                </Field>
+                  </Field>
 
-                {/* location */}
-                <Field n={5} label="Where are you based?" htmlFor="ap-loc">
-                  <div className="relative">
-                    <span className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-faint">
-                      <Pin />
-                    </span>
-                    <input
-                      id="ap-loc"
-                      type="text"
-                      required
-                      placeholder="London, UK"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className={`${inputClass} pl-7`}
-                    />
-                    <Underline />
+                  <div className="mt-1">
+                    <button
+                      type="submit"
+                      disabled={status === "submitting"}
+                      className="group inline-flex h-13 w-full items-center justify-center gap-2 rounded-full bg-ink text-base font-medium text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
+                    >
+                      {status === "submitting" ? (
+                        <>
+                          <Spinner />
+                          Sending…
+                        </>
+                      ) : (
+                        <>
+                          Submit application
+                          <Arrow />
+                        </>
+                      )}
+                    </button>
+                    <p className="mt-3.5 text-center text-xs text-faint">
+                      Applications reviewed weekly · No spam, ever
+                    </p>
                   </div>
-                </Field>
-
-                {/* submit */}
-                <div className="mt-2">
-                  <button
-                    type="submit"
-                    disabled={status === "submitting"}
-                    className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-ink text-base font-medium text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
-                  >
-                    {status === "submitting" ? (
-                      <>
-                        <Spinner />
-                        Sending…
-                      </>
-                    ) : (
-                      <>
-                        Submit application
-                        <Arrow />
-                      </>
-                    )}
-                  </button>
-                  <p className="mt-4 text-center text-xs text-faint">
-                    Applications reviewed weekly · No spam, ever
-                  </p>
-                </div>
-              </motion.form>
-            )}
-          </AnimatePresence>
+                </form>
+              )}
+            </div>
+          </motion.div>
         </motion.div>
-      </div>
-    </section>
+      )}
+    </AnimatePresence>
   );
 }

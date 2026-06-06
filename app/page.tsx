@@ -1,5 +1,5 @@
 import WaterCanvas from "./components/water-canvas";
-import Apply from "./components/apply";
+import ApplyModal from "./components/apply";
 import { Reveal, Stagger, StaggerItem } from "./components/gsap";
 
 const OFFERINGS = [
@@ -23,12 +23,13 @@ export default function Home() {
           >
             Viral&nbsp;Mafia
           </a>
-          <a
-            href="#apply"
+          <button
+            type="button"
+            data-apply
             className="rounded-full border border-line bg-white/60 px-4 py-2 text-sm font-medium text-ink backdrop-blur-sm transition-colors hover:border-ink"
           >
             Apply
-          </a>
+          </button>
         </div>
       </header>
 
@@ -53,12 +54,13 @@ export default function Home() {
               not another course.
             </p>
             <div className="mt-10 flex flex-col items-center gap-5">
-              <a
-                href="#apply"
+              <button
+                type="button"
+                data-apply
                 className="inline-flex h-13 items-center justify-center rounded-full bg-ink px-9 text-base font-medium text-white transition-transform duration-200 hover:-translate-y-0.5"
               >
                 Apply for access
-              </a>
+              </button>
             </div>
           </Reveal>
         </section>
@@ -117,17 +119,37 @@ export default function Home() {
               <br />
               <span className="italic">not a logo on a banner.</span>
             </h2>
-            <a
-              href="#apply"
+            <button
+              type="button"
+              data-apply
               className="mt-10 inline-flex h-12 items-center justify-center rounded-full border border-line bg-white/60 px-7 text-sm font-medium text-ink backdrop-blur-sm transition-colors hover:border-ink"
             >
               Become a partner
-            </a>
+            </button>
           </Reveal>
         </section>
 
-        {/* Apply — the real application flow */}
-        <Apply />
+        {/* Apply — CTA that opens the application modal */}
+        <section id="apply" data-snap className="px-6 py-44 text-center">
+          <Reveal>
+            <h2 className="mx-auto max-w-3xl text-balance font-display text-5xl font-light leading-[1.02] tracking-[-0.03em] text-ink sm:text-8xl">
+              Every application
+              <br />
+              <span className="italic">is read.</span>
+            </h2>
+            <p className="mx-auto mt-8 max-w-lg text-lg leading-relaxed text-muted">
+              No bots, no auto-replies. A real member reads every one. We keep the
+              bar high and the room small — roughly one in nine get in.
+            </p>
+            <button
+              type="button"
+              data-apply
+              className="mt-12 inline-flex h-14 items-center justify-center rounded-full bg-ink px-10 text-base font-medium text-white transition-transform duration-200 hover:-translate-y-0.5"
+            >
+              Apply for access
+            </button>
+          </Reveal>
+        </section>
 
         {/* Footer */}
         <footer className="border-t border-line px-6 py-12">
@@ -142,6 +164,8 @@ export default function Home() {
           </div>
         </footer>
       </main>
+
+      <ApplyModal />
     </>
   );
 }
