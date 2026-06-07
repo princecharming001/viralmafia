@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+# /out/ is the raw export; we publish the copy in /docs (committed for Pages)
 /out/
 
 # production
