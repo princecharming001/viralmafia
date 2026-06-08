@@ -4,20 +4,20 @@ import { Reveal, Stagger, StaggerItem } from "./components/gsap";
 
 const OFFERINGS = [
   {
-    k: "Events",
-    v: "In-person meetups and creator events — the rooms where collabs and intros actually happen.",
+    k: "Challenges",
+    v: "30-day growth challenges running constantly — real accountability and cash on the line for the creators building fastest.",
   },
   {
     k: "Workshops",
-    v: "Hands-on sessions on how to actually go viral: hooks, formats, and distribution that work.",
-  },
-  {
-    k: "Challenges",
-    v: "30-day growth challenges with real cash rewards for the creators who build the fastest.",
+    v: "Workshops led by creators who've actually made it — successful names across platforms breaking down what's working now.",
   },
   {
     k: "Community",
-    v: "A room you can depend on — and earn from. Warm intros, paid collabs, and people who show up.",
+    v: "A room of top creators, top founders, and VCs you can depend on — and learn from.",
+  },
+  {
+    k: "Events",
+    v: "Exclusive, invite-only events where the right people are actually in the room.",
   },
 ];
 
@@ -61,10 +61,10 @@ export default function Home() {
               <span className="italic">together.</span>
             </h1>
             <p className="mx-auto mt-10 max-w-xl text-pretty text-lg leading-relaxed text-muted">
-              The people who win online aren&apos;t the loudest — they&apos;re the
-              ones in the right room. Whether you&apos;re growing a personal brand
-              or a company, Viral Valley is where you learn what actually goes
-              viral — and build it alongside people doing the same.
+              A selective community for people growing a brand — personal or
+              company. Constant 30-day growth challenges, workshops from creators
+              who&apos;ve actually made it, and a room of top creators, founders,
+              and VCs to learn from.
             </p>
             <div className="mt-10 flex flex-col items-center gap-5">
               <button
@@ -105,20 +105,14 @@ export default function Home() {
         <section data-snap className="px-6 py-40 text-center">
           <Reveal>
             <p className="mx-auto max-w-3xl text-balance font-display text-3xl font-light leading-[1.3] text-ink sm:text-4xl">
-              &ldquo;Going viral shouldn&apos;t be luck. Put the right people in
-              one room — with real challenges, real rewards, and people who show
-              up — and momentum stops being random.&rdquo;
+              &ldquo;Nobody who&apos;s good at this did it alone. I built Viral
+              Valley as the room I wish I&apos;d had starting out — the people who
+              tell you the truth about what&apos;s working, and push you to keep
+              going.&rdquo;
             </p>
             <p className="mt-8 text-sm uppercase tracking-[0.2em] text-muted">
               Jay Neo · Founder, Viral Valley
             </p>
-            <div className="mx-auto mt-14 flex max-w-md flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm tracking-wide text-faint">
-              <span>800+ members</span>
-              <span className="h-1 w-1 rounded-full bg-faint" />
-              <span>Live events &amp; workshops</span>
-              <span className="h-1 w-1 rounded-full bg-faint" />
-              <span>$50k+ in challenge rewards</span>
-            </div>
           </Reveal>
         </section>
 
