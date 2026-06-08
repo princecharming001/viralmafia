@@ -9,6 +9,7 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import NarwhalLeap from "./narwhal";
+import { supabase } from "../lib/supabase";
 
 const NETWORKS = [
   "Instagram",
@@ -25,11 +26,6 @@ const NETWORKS = [
 // Soft, muted pastel spectrum (gentler than the vivid water).
 const RAINBOW =
   "linear-gradient(90deg,#f3acc0,#f6cfa9,#f1e7ab,#bfe6c8,#aed5ef,#c8bfee,#efbce1)";
-
-// Where applications are sent. Paste your Make.com (or Zapier) webhook URL here,
-// or set NEXT_PUBLIC_FORM_WEBHOOK at build time. While empty, the form still
-// works but just shows the success state without sending anything.
-const WEBHOOK_URL = process.env.NEXT_PUBLIC_FORM_WEBHOOK ?? "";
 
 type Platform = { id: number; network: string; handle: string };
 
@@ -200,7 +196,7 @@ export default function ApplyModal() {
     setStatus("submitting");
 
     const chosen = platforms.filter((p) => p.handle.trim());
-    const payload = {
+    const record = {
       name: name.trim(),
       email: email.trim(),
       phone: phone.trim(),
@@ -208,23 +204,15 @@ export default function ApplyModal() {
       want: want.trim(),
       offer: offer.trim(),
       platforms: chosen.map((p) => ({ network: p.network, handle: p.handle.trim() })),
-      platformsText: chosen.map((p) => `${p.network}: ${p.handle.trim()}`).join(", "),
-      submittedAt: new Date().toISOString(),
+      platforms_text: chosen
+        .map((p) => `${p.network}: ${p.handle.trim()}`)
+        .join(", "),
       source: "viralvalley.io",
     };
 
     try {
-      if (WEBHOOK_URL) {
-        const res = await fetch(WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error(`status ${res.status}`);
-      } else {
-        // no endpoint configured yet — mimic a short send
-        await new Promise((r) => setTimeout(r, 900));
-      }
+      const { error } = await supabase.from("applications").insert(record);
+      if (error) throw error;
       setStatus("done");
     } catch {
       setErr(true);
