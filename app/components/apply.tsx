@@ -210,7 +210,7 @@ export default function ApplyModal() {
           <motion.div
             role="dialog"
             aria-modal="true"
-            aria-label="Apply to Viral Mafia"
+            aria-label="Apply to Viral Valley"
             initial={{ opacity: 0, scale: 0.96, y: 14 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 10 }}
@@ -232,7 +232,7 @@ export default function ApplyModal() {
             <div className="flex shrink-0 items-start justify-between gap-4 px-7 pb-4 pt-6">
               <div>
                 <p className="text-[0.7rem] font-medium uppercase tracking-[0.22em] text-muted">
-                  Apply to Viral Mafia
+                  Apply to Viral Valley
                 </p>
                 <h2 className="mt-1.5 font-display text-2xl font-light leading-tight text-ink">
                   Every application is read.
@@ -396,7 +396,7 @@ export default function ApplyModal() {
 
                   <Field
                     n={5}
-                    label="What do you want from Viral Mafia?"
+                    label="What do you want from Viral Valley?"
                     htmlFor="ap-want"
                   >
                     <textarea
