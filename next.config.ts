@@ -1,21 +1,16 @@
 import type { NextConfig } from "next";
 
 /**
- * GitHub Pages deployment.
+ * GitHub Pages deployment (custom domain: viralvalley.io).
  *
  * Pages only serves static files, so we use Next's static export (`output: "export"`)
  * which writes a fully static site to `out/` on `next build`.
  *
- * A project site is served from https://<user>.github.io/<repo>/, so every asset
- * must be prefixed with `/<repo>`. That prefix is applied in production builds and
- * can be overridden with the BASE_PATH env var (set BASE_PATH="" for a user page or
- * a custom domain served from the root).
+ * The site is served from the custom domain ROOT (https://viralvalley.io/), so there
+ * is no path prefix. (If you ever serve from the bare https://<user>.github.io/<repo>/
+ * URL instead, build with BASE_PATH=/viralmafia.)
  */
-const repo = "viralmafia";
-
-const basePath =
-  process.env.BASE_PATH ??
-  (process.env.NODE_ENV === "production" ? `/${repo}` : "");
+const basePath = process.env.BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
   output: "export",
