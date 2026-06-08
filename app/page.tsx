@@ -28,7 +28,7 @@ export default function Home() {
 
       {/* Minimal top bar */}
       <header className="pass-through fixed inset-x-0 top-0 z-30">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <div className="flex h-16 items-center justify-between px-6 sm:px-10">
           <a
             href="#top"
             className="text-sm font-medium uppercase tracking-[0.22em] text-ink"
