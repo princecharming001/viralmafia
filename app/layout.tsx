@@ -17,13 +17,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Viral Valley — go viral, together",
+  title: "Viral Valley · go viral, together",
   description:
-    "Viral Valley is an invite-only community for people growing a brand — personal or company — who want to learn how to go viral, through events, workshops, and 30-day challenges with cash rewards.",
+    "Viral Valley is an invite-only community for people growing a brand, personal or company, who want to learn how to go viral through events, workshops, and 30-day challenges with cash rewards.",
   openGraph: {
-    title: "Viral Valley — go viral, together",
+    title: "Viral Valley · go viral, together",
     description:
-      "An invite-only community for people growing a personal or company brand who want to learn how to go viral — events, workshops, and 30-day challenges.",
+      "An invite-only community for people growing a personal or company brand who want to learn how to go viral through events, workshops, and 30-day challenges.",
     type: "website",
   },
 };

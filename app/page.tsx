@@ -5,15 +5,15 @@ import { Reveal, Stagger, StaggerItem } from "./components/gsap";
 const OFFERINGS = [
   {
     k: "Challenges",
-    v: "30-day growth challenges running constantly — real accountability and cash on the line for the creators building fastest.",
+    v: "30-day growth challenges running constantly, with real accountability and cash on the line for the creators building fastest.",
   },
   {
     k: "Workshops",
-    v: "Workshops led by creators who've actually made it — successful names across platforms breaking down what's working now.",
+    v: "Workshops led by creators who've actually made it. Successful names across platforms breaking down what's working now.",
   },
   {
     k: "Community",
-    v: "A room of top creators, top founders, and VCs you can depend on — and learn from.",
+    v: "A room of top creators, top founders, and VCs you can depend on and learn from.",
   },
   {
     k: "Events",
@@ -61,7 +61,7 @@ export default function Home() {
               <span className="italic">together.</span>
             </h1>
             <p className="mx-auto mt-10 max-w-xl text-pretty text-lg leading-relaxed text-muted">
-              A selective community for people growing a brand — personal or
+              A selective community for people growing a brand, personal or
               company. Constant 30-day growth challenges, workshops from creators
               who&apos;ve actually made it, and a room of top creators, founders,
               and VCs to learn from.
@@ -106,9 +106,9 @@ export default function Home() {
           <Reveal>
             <p className="mx-auto max-w-3xl text-balance font-display text-3xl font-light leading-[1.3] text-ink sm:text-4xl">
               &ldquo;Nobody who&apos;s good at this did it alone. I built Viral
-              Valley as the room I wish I&apos;d had starting out — the people who
-              tell you the truth about what&apos;s working, and push you to keep
-              going.&rdquo;
+              Valley as the room I wish I&apos;d had starting out, full of people
+              who tell you the truth about what&apos;s working and push you to
+              keep going.&rdquo;
             </p>
             <p className="mt-8 text-sm uppercase tracking-[0.2em] text-muted">
               Jay Neo · Founder, Viral Valley
@@ -147,7 +147,7 @@ export default function Home() {
             </h2>
             <p className="mx-auto mt-8 max-w-lg text-lg leading-relaxed text-muted">
               No bots, no auto-replies. A real member reads every one. We keep the
-              bar high and the room small — roughly one in nine get in.
+              bar high and the room small. Roughly one in nine get in.
             </p>
             <button
               type="button"
