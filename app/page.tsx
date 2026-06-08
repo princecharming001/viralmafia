@@ -62,9 +62,9 @@ export default function Home() {
             </h1>
             <p className="mx-auto mt-10 max-w-xl text-pretty text-lg leading-relaxed text-muted">
               The people who win online aren&apos;t the loudest — they&apos;re the
-              ones in the right room. Viral Valley is a community for people
-              growing a brand — personal or company — who want to learn how to go
-              viral, through events, workshops, and challenges you can earn from.
+              ones in the right room. Whether you&apos;re growing a personal brand
+              or a company, Viral Valley is where you learn what actually goes
+              viral — and build it alongside people doing the same.
             </p>
             <div className="mt-10 flex flex-col items-center gap-5">
               <button
