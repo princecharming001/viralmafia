@@ -26,6 +26,11 @@ const NETWORKS = [
 const RAINBOW =
   "linear-gradient(90deg,#f3acc0,#f6cfa9,#f1e7ab,#bfe6c8,#aed5ef,#c8bfee,#efbce1)";
 
+// Where applications are sent. Paste your Make.com (or Zapier) webhook URL here,
+// or set NEXT_PUBLIC_FORM_WEBHOOK at build time. While empty, the form still
+// works but just shows the success state without sending anything.
+const WEBHOOK_URL = process.env.NEXT_PUBLIC_FORM_WEBHOOK ?? "";
+
 type Platform = { id: number; network: string; handle: string };
 
 let pid = 100;
@@ -122,6 +127,8 @@ export default function ApplyModal() {
   const [offer, setOffer] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "done">("idle");
+  const [err, setErr] = useState(false);
+  const [hp, setHp] = useState(""); // honeypot — real users never fill this
 
   // Any element with [data-apply] opens the modal
   useEffect(() => {
@@ -181,11 +188,48 @@ export default function ApplyModal() {
     return f / 7;
   }, [name, email, phone, platforms, want, offer, location]);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (status !== "idle") return;
+    // bot filled the hidden field -> silently pretend success, send nothing
+    if (hp.trim()) {
+      setStatus("done");
+      return;
+    }
+    setErr(false);
     setStatus("submitting");
-    window.setTimeout(() => setStatus("done"), 1300);
+
+    const chosen = platforms.filter((p) => p.handle.trim());
+    const payload = {
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      location: location.trim(),
+      want: want.trim(),
+      offer: offer.trim(),
+      platforms: chosen.map((p) => ({ network: p.network, handle: p.handle.trim() })),
+      platformsText: chosen.map((p) => `${p.network}: ${p.handle.trim()}`).join(", "),
+      submittedAt: new Date().toISOString(),
+      source: "viralvalley.io",
+    };
+
+    try {
+      if (WEBHOOK_URL) {
+        const res = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(`status ${res.status}`);
+      } else {
+        // no endpoint configured yet — mimic a short send
+        await new Promise((r) => setTimeout(r, 900));
+      }
+      setStatus("done");
+    } catch {
+      setErr(true);
+      setStatus("idle");
+    }
   };
 
   return (
@@ -283,6 +327,23 @@ export default function ApplyModal() {
                 </motion.div>
               ) : (
                 <form onSubmit={onSubmit} className="flex flex-col gap-6 pt-1">
+                  {/* honeypot: hidden from people, catches bots */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute left-[-9999px] h-0 w-0 overflow-hidden"
+                  >
+                    <label>
+                      Company
+                      <input
+                        type="text"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={hp}
+                        onChange={(e) => setHp(e.target.value)}
+                      />
+                    </label>
+                  </div>
+
                   <Field n={1} label="Your name" htmlFor="ap-name">
                     <input
                       id="ap-name"
@@ -463,9 +524,20 @@ export default function ApplyModal() {
                         </>
                       )}
                     </button>
-                    <p className="mt-3.5 text-center text-xs text-faint">
-                      Applications reviewed weekly · No spam, ever
-                    </p>
+                    {err ? (
+                      <p
+                        role="alert"
+                        className="mt-3.5 text-center text-xs"
+                        style={{ color: "#c0301a" }}
+                      >
+                        Something went wrong sending your application. Please try
+                        again.
+                      </p>
+                    ) : (
+                      <p className="mt-3.5 text-center text-xs text-faint">
+                        Applications reviewed weekly · No spam, ever
+                      </p>
+                    )}
                   </div>
                 </form>
               )}
